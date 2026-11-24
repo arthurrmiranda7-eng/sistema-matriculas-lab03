@@ -1,0 +1,70 @@
+@startuml
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+title Campus — Classes · v1 (projeto estrutural inicial)
+class Usuario {
+  id: UUID
+  nome: String
+  email: String
+  papel: String
+}
+class Curso {
+  id: UUID
+  nome: String
+  creditos: Integer
+}
+class Disciplina {
+  id: UUID
+  codigo: String
+  nome: String
+  creditos: Integer
+}
+class Semestre {
+  id: UUID
+  nome: String
+  inicioMatriculas: Date
+  fimMatriculas: Date
+}
+class Oferta {
+  id: UUID
+  capacidade: Integer = 60
+  situacao: String
+}
+class Matricula {
+  id: UUID
+  tipo: String
+  situacao: String
+}
+class AuthService {
+  entrar(email, senha)
+  sair()
+}
+class MatriculaService {
+  salvar(semestreId, obrigatorias, optativas)
+  cancelar(matriculaId)
+}
+class ProfessorService {
+  alunos(ofertaId)
+}
+class SecretariaService {
+  salvar(tabela, dados)
+  encerrar(semestreId)
+}
+Curso "1" o-- "0..*" Disciplina
+Curso "0..1" -- "0..*" Usuario : vínculo do aluno
+Disciplina "1" -- "0..*" Oferta
+Semestre "1" o-- "0..*" Oferta
+Usuario "0..1" -- "0..*" Oferta : professor
+Usuario "1" -- "0..*" Matricula : aluno
+Oferta "1" -- "0..60" Matricula
+AuthService ..> Usuario
+MatriculaService ..> Matricula
+ProfessorService ..> Oferta
+SecretariaService ..> Semestre
+note bottom of Matricula
+  4 primeiras opções e até 2 alternativas por semestre.
+  Matrícula e cancelamento apenas durante o período.
+end note
+@enduml

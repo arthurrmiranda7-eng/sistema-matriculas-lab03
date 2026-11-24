@@ -1,0 +1,26 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+title Campus — Arquitetura · v1 (proposta inicial)
+actor "Aluno / Professor / Secretaria" as usuario
+node "Navegador" {
+  component "Páginas HTML5 + Bootstrap 5\nEstilos CSS3" as ui
+  component "Módulos JavaScript\nModelos e serviços" as js
+  component "supabase-js" as sdk
+}
+cloud "Supabase" {
+  component "Supabase Auth" as auth
+  database "PostgreSQL\nCursos, currículo e matrículas" as db
+}
+component "Sistema de cobranças\n(destino de notificação)" as billing
+usuario --> ui
+ui --> js
+js --> sdk
+sdk --> auth : e-mail + senha
+sdk --> db : persistência
+js ..> billing : notificar inscrição
+note bottom of billing
+  Mecanismo de integração a detalhar na implementação.
+end note
+@enduml

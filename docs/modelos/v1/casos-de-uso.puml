@@ -1,0 +1,38 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName SansSerif
+skinparam backgroundColor #FFFFFF
+title Campus — Casos de uso · v1 (análise inicial)
+actor Usuário
+actor Aluno
+actor Professor
+actor Secretaria
+Aluno --|> Usuário
+Professor --|> Usuário
+Secretaria --|> Usuário
+rectangle "Sistema de Matrículas" {
+  usecase "Autenticar com senha" as Login
+  usecase "Consultar currículo\ndo semestre" as Catalogo
+  usecase "Matricular-se em 4 obrigatórias\ne até 2 optativas" as Matricula
+  usecase "Cancelar matrícula\nno período permitido" as Cancelar
+  usecase "Consultar alunos\npor disciplina" as Lista
+  usecase "Manter cursos, disciplinas,\nalunos e professores" as Manter
+  usecase "Gerar currículo semestral" as Curriculo
+  usecase "Encerrar período e\nativar/cancelar disciplinas" as Encerrar
+  usecase "Notificar cobrança" as Cobranca
+}
+Usuário --> Login
+Aluno --> Catalogo
+Aluno --> Matricula
+Aluno --> Cancelar
+Professor --> Lista
+Secretaria --> Manter
+Secretaria --> Curriculo
+Secretaria --> Encerrar
+Matricula ..> Cobranca : <<include>>
+note bottom of Encerrar
+  Mínimo 3 alunos; máximo 60 por disciplina.
+end note
+@enduml
