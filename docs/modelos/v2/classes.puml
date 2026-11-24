@@ -1,0 +1,133 @@
+@startuml
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam linetype ortho
+title Campus — Classes · v2 (domínio e serviços implementados)
+package "Modelos JavaScript" {
+  class Usuario <<profiles>> {
+    id: UUID
+    name: String
+    email: String
+    role: aluno | professor | secretaria
+    course_id: UUID?
+  }
+  class Curso <<courses>> {
+    id: UUID
+    name: String
+    credits: Integer
+  }
+  class Disciplina <<subjects>> {
+    id: UUID
+    course_id: UUID
+    code: String
+    name: String
+    credits: Integer
+  }
+  class Semestre <<semesters>> {
+    id: UUID
+    name: String
+    enrollment_start: DateTime
+    enrollment_end: DateTime
+    closed: Boolean
+    estaAberto(): Boolean
+  }
+  class Oferta <<offerings / catálogo>> {
+    id: UUID
+    subject_id: UUID
+    course_id: UUID
+    subject_name: String
+    code: String
+    credits: Integer
+    professor_name: String?
+    professor_id: UUID?
+    status: aberta | ativa | cancelada
+    capacity: Integer
+    enrolled: Integer
+    vagas(): Integer
+  }
+  class Matricula <<enrollments>> {
+    id: UUID
+    student_id: UUID
+    offering_id: UUID
+    kind: obrigatoria | optativa
+    status: matriculada | cancelada
+  }
+  class EventoCobranca <<billing_events>> {
+    id: UUID
+    student_id: UUID
+    semester_id: UUID
+    payload: JSON
+    status: pendente | enviado
+    created_at: DateTime
+  }
+}
+package "Serviços JavaScript" {
+  class AuthService {
+    client: SupabaseClient
+    entrar(email, password)
+    sair()
+    usuario()
+  }
+  class CatalogoService {
+    client: SupabaseClient
+    semestres()
+    ofertas(id)
+    cursos()
+  }
+  class MatriculaService {
+    client: SupabaseClient
+    listar(studentId)
+    salvar(id, required, optional)
+    cancelar(id)
+  }
+  class ProfessorService {
+    client: SupabaseClient
+    listarAlunos(offeringId)
+  }
+  class SecretariaService {
+    client: SupabaseClient
+    listar(table)
+    salvar(table, data)
+    atualizarPerfil(id, data)
+    encerrar(id)
+    confirmarCobranca(id)
+  }
+}
+Curso "1" o-- "0..*" Disciplina
+Curso "0..1" -- "0..*" Usuario : vínculo acadêmico
+Disciplina "1" -- "0..*" Oferta
+Semestre "1" o-- "0..*" Oferta
+Usuario "0..1" -- "0..*" Oferta : professor
+Usuario "1" -- "0..*" Matricula : aluno
+Oferta "1" -- "0..*" Matricula : histórico de inscrições
+Usuario "1" -- "0..*" EventoCobranca : aluno
+Semestre "1" -- "0..*" EventoCobranca
+CatalogoService ..> Curso
+CatalogoService ..> Semestre
+CatalogoService ..> Oferta
+AuthService ..> Usuario
+MatriculaService ..> Matricula
+MatriculaService ..> EventoCobranca : RPC transacional
+ProfessorService ..> Oferta
+SecretariaService ..> Semestre
+SecretariaService ..> EventoCobranca
+note bottom of Oferta
+  Uma oferta por disciplina e semestre.
+  Vínculo por offerings.semester_id; o catálogo recebe
+  o semestre como parâmetro e retorna os dados agregados.
+  enrolled é calculado pelo catálogo, não armazenado.
+  No máximo 60 matrículas com status matriculada.
+  Histórico cancelado não ocupa vaga.
+end note
+note bottom of AuthService
+  Senhas pertencem ao Supabase Auth.
+  Os modelos não armazenam senha.
+end note
+note bottom of MatriculaService
+  save_enrollment e cancel_enrollment no PostgreSQL
+  validam papel, período, curso e capacidade.
+  Matrícula e notificação na mesma transação.
+end note
+@enduml

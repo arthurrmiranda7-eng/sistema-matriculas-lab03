@@ -1,0 +1,45 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam componentStyle rectangle
+title Campus — Arquitetura · v2 (implementação)
+actor "Aluno / Professor / Secretaria" as usuario
+node "Navegador · hospedagem estática" {
+  component "index.html + assets/style.css\nHTML5 · CSS3 · Bootstrap 5" as ui
+  component "js/app.js\nInterface, navegação e formulários" as app
+  component "js/models.js\nEntidades e apresentação das regras" as models
+  component "js/services.js\nAuthService · CatalogoService\nMatriculaService · ProfessorService\nSecretariaService" as services
+  component "supabase-js v2" as sdk
+  component "Conexão pública\nconfig.local.js ou preferência local" as config
+}
+cloud "Supabase" {
+  component "Supabase Auth\nE-mail/senha e sessão JWT" as auth
+  component "API de dados / RPC\nJWT + RLS + permissões" as api
+  database "PostgreSQL\nCursos · usuários · disciplinas\nsemestres · ofertas · matrículas" as db
+  component "Funções transacionais\nsave_enrollment · cancel_enrollment\nclose_semester" as rpc
+  database "billing_events\nCaixa de saída durável" as outbox
+}
+usuario --> ui
+ui --> app
+app --> models
+app --> services
+config --> sdk : URL + chave pública
+services --> sdk
+sdk --> auth : autenticar / encerrar sessão
+sdk --> api : HTTPS + sessão
+api --> db : leituras / manutenção com RLS
+api --> rpc : comandos de matrícula
+rpc --> db : validações + bloqueios
+rpc --> outbox : gravação na mesma transação
+api --> outbox : consulta e confirmação pela secretaria
+note bottom of outbox
+  Snapshot das disciplinas e créditos por evento.
+  Consumidor externo de cobranças não implementado.
+  Confirmar envio não realiza comunicação externa.
+end note
+note bottom of api
+  Papéis são lidos de profiles.
+  Chave service_role nunca vai para o navegador.
+end note
+@enduml

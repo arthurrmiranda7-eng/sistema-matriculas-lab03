@@ -1,0 +1,52 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName SansSerif
+skinparam backgroundColor #FFFFFF
+title Campus — Casos de uso · v2 (implementação)
+actor Usuário
+actor Aluno
+actor Professor
+actor Secretaria
+Aluno --|> Usuário
+Professor --|> Usuário
+Secretaria --|> Usuário
+rectangle "Campus — Sistema de Matrículas" {
+  usecase "Entrar / sair\n(Supabase Auth)" as Login
+  usecase "Consultar currículo\ne vagas do semestre" as Catalogo
+  usecase "Enviar matrícula\n4 obrigatórias + até 2 optativas" as Matricula
+  usecase "Cancelar a própria\ninscrição" as Cancelar
+  usecase "Validar período, curso,\nlimites e vagas" as Validar
+  usecase "Consultar alunos\ndas próprias ofertas" as Lista
+  usecase "Manter cursos, disciplinas\ne perfis acadêmicos" as Manter
+  usecase "Configurar período e\ncompor currículo semestral" as Curriculo
+  usecase "Encerrar semestre\napós fim do período" as Encerrar
+  usecase "Ativar ofertas com ≥ 3 alunos\ne cancelar as demais" as Ativar
+  usecase "Registrar notificação\nde cobrança na caixa de saída" as Cobranca
+  usecase "Consultar eventos e\nregistrar envio confirmado" as Eventos
+}
+Usuário --> Login
+Aluno --> Catalogo
+Aluno --> Matricula
+Aluno --> Cancelar
+Professor --> Lista
+Secretaria --> Manter
+Secretaria --> Curriculo
+Secretaria --> Encerrar
+Secretaria --> Eventos
+Matricula ..> Validar : <<include>>
+Matricula ..> Cobranca : <<include>>
+Cancelar ..> Cobranca : <<include>>
+Encerrar ..> Ativar : <<include>>
+Cobranca ..> Encerrar : <<extend>>\n[há alunos afetados por cancelamento]
+note bottom of Validar
+  Exatamente 4 obrigatórias; 0–2 optativas; sem repetição.
+  No máximo 60 inscrições válidas por oferta.
+  Período validado com o relógio do banco.
+end note
+note bottom of Eventos
+  Envio externo não é automatizado neste protótipo.
+  O evento persistido é a notificação disponível à cobrança.
+end note
+@enduml
