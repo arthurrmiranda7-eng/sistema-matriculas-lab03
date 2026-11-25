@@ -91,6 +91,31 @@ test('sessão ausente não consulta dados de perfil', async () => {
   assert.equal(await auth.usuario(), null);
 });
 
+test('alteração de senha usa a sessão atual do Auth sem escrever no perfil', async () => {
+  const password = 'senha-ficticia-apenas-teste';
+  const updated = { user: { id: 'usuario-autenticado' } };
+  let calls = 0;
+  const auth = new AuthService({
+    auth: { async updateUser(attributes) {
+      calls++;
+      assert.deepEqual(attributes, { password });
+      return { data: updated, error: null };
+    } },
+    from() { throw new Error('Senhas devem ser alteradas exclusivamente pelo Supabase Auth'); },
+  });
+  assert.equal(await auth.alterarSenha(password), updated);
+  assert.equal(calls, 1);
+});
+
+test('recusa do Auth ao alterar senha é preservada para impedir falso sucesso', async () => {
+  const error = { message: 'Reauthentication required', code: 'reauthentication_needed' };
+  const auth = new AuthService({
+    auth: { async updateUser() { return { data: null, error }; } },
+    from() { throw new Error('Uma falha no Auth não deve tentar alterar tabelas'); },
+  });
+  await assert.rejects(auth.alterarSenha('senha-ficticia-apenas-teste'), e => e === error);
+});
+
 test('falha de autenticação e perfil indisponível chegam à interface', async () => {
   const error = { message: 'Invalid login credentials' };
   const auth = new AuthService({ auth: { async signInWithPassword() { return { data: null, error }; } } });

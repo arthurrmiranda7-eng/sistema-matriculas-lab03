@@ -67,6 +67,7 @@ package "Serviços JavaScript" {
   class AuthService {
     client: SupabaseClient
     entrar(email, password)
+    alterarSenha(password)
     sair()
     usuario()
   }

@@ -84,6 +84,31 @@ function configureDialog() {
     }); };
   });
 }
+function changePasswordDialog() {
+  if (!state.user) return;
+  dialog('Alterar senha', `<p class="small text-muted">Use uma senha exclusiva para este sistema, com pelo menos 12 caracteres.</p><form id="password-form"><div class="mb-3"><label class="form-label" for="new-password">Nova senha</label><input class="form-control" id="new-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div><div class="mb-3"><label class="form-label" for="repeat-password">Confirmar nova senha</label><input class="form-control" id="repeat-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div><p id="password-error" class="error-inline" role="alert"></p><div class="dialog-actions"><button type="button" class="btn btn-outline-secondary" data-dismiss>Cancelar</button><button type="submit" class="btn btn-primary">Salvar nova senha</button></div></form>`, () => {
+    const form = $('#password-form');
+    modal.addEventListener('close', () => form.reset(), { once: true });
+    $('[data-dismiss]', form).onclick = () => modal.close();
+    form.onsubmit = event => {
+      event.preventDefault();
+      const password = $('#new-password', form).value;
+      const confirmation = $('#repeat-password', form).value;
+      const feedback = $('#password-error', form);
+      feedback.textContent = '';
+      if (password.length < 12) { feedback.textContent = 'A nova senha deve ter pelo menos 12 caracteres.'; return; }
+      if (password !== confirmation) { feedback.textContent = 'As duas senhas precisam ser iguais.'; return; }
+      action(async () => {
+        try {
+          await auth.alterarSenha(password);
+          form.reset();
+          modal.close();
+          toast('Senha alterada com sucesso. Use a nova senha no próximo acesso.');
+        } catch (error) { feedback.textContent = errorMessage(error); }
+      });
+    };
+  });
+}
 function validateConfig(c) {
   const url = new URL(c.supabaseUrl);
   if (url.protocol !== 'https:' && !(['localhost', '127.0.0.1'].includes(url.hostname) && url.protocol === 'http:')) throw new Error('Utilize uma URL HTTPS do projeto Supabase.');
@@ -127,8 +152,9 @@ function navItems() {
 }
 function renderShell() {
   const u = state.user;
-  app.innerHTML = `<div class="layout"><aside class="sidebar">${brand()}<div class="nav-label">Portal ${u.role === 'aluno' ? 'do aluno' : u.role === 'professor' ? 'do professor' : 'da secretaria'}</div><nav aria-label="Menu principal">${navItems().map(([id, text, glyph]) => `<button class="nav-item-button ${id === state.page ? 'active' : ''}" data-page="${id}" ${id === state.page ? 'aria-current="page"' : ''}>${icon(glyph)}${text}</button>`).join('')}</nav><div class="sidebar-bottom"><div class="profile"><span class="avatar" aria-hidden="true">${esc(u.name.split(' ').map(w => w[0]).slice(0, 2).join(''))}</span><div><div class="profile-name" title="${esc(u.name)}">${esc(u.name)}</div><div class="profile-role">${roles[u.role]}</div></div></div><button id="logout" class="logout">Sair da conta</button></div></aside><div class="workspace"><header class="topbar"><div class="breadcrumb-text">Portal acadêmico <span>/ ${esc(navItems().find(n => n[0] === state.page)?.[1] || 'Campus')}</span></div><div class="semester-select"><label for="semester">Semestre</label><select id="semester" class="form-select" ${!state.semesters.length ? 'disabled' : ''}>${state.semesters.length ? state.semesters.map(s => `<option value="${esc(s.id)}" ${s.id === state.semesterId ? 'selected' : ''}>${esc(s.name)}</option>`).join('') : '<option>Nenhum cadastrado</option>'}</select></div></header><main id="main" class="content" tabindex="-1"></main></div></div>`;
+  app.innerHTML = `<div class="layout"><aside class="sidebar">${brand()}<div class="nav-label">Portal ${u.role === 'aluno' ? 'do aluno' : u.role === 'professor' ? 'do professor' : 'da secretaria'}</div><nav aria-label="Menu principal">${navItems().map(([id, text, glyph]) => `<button class="nav-item-button ${id === state.page ? 'active' : ''}" data-page="${id}" ${id === state.page ? 'aria-current="page"' : ''}>${icon(glyph)}${text}</button>`).join('')}</nav><div class="sidebar-bottom"><div class="profile"><span class="avatar" aria-hidden="true">${esc(u.name.split(' ').map(w => w[0]).slice(0, 2).join(''))}</span><div><div class="profile-name" title="${esc(u.name)}">${esc(u.name)}</div><div class="profile-role">${roles[u.role]}</div></div></div><div class="account-actions"><button id="change-password" class="logout" type="button">Alterar senha</button><button id="logout" class="logout">Sair da conta</button></div></div></aside><div class="workspace"><header class="topbar"><div class="breadcrumb-text">Portal acadêmico <span>/ ${esc(navItems().find(n => n[0] === state.page)?.[1] || 'Campus')}</span></div><div class="semester-select"><label for="semester">Semestre</label><select id="semester" class="form-select" ${!state.semesters.length ? 'disabled' : ''}>${state.semesters.length ? state.semesters.map(s => `<option value="${esc(s.id)}" ${s.id === state.semesterId ? 'selected' : ''}>${esc(s.name)}</option>`).join('') : '<option>Nenhum cadastrado</option>'}</select></div></header><main id="main" class="content" tabindex="-1"></main></div></div>`;
   $$('[data-page]').forEach(el => el.onclick = () => { if (state.busy) return; state.page = el.dataset.page; state.search = ''; state.filter = ''; renderShell(); $('#main').focus(); });
+  $('#change-password').onclick = () => { if (!state.busy) changePasswordDialog(); };
   $('#logout').onclick = () => action(async () => { await auth.sair(); state.user = null; state.semesterId = ''; renderLogin(); toast('Você saiu da conta.'); });
   $('#semester').onchange = e => action(async () => { state.semesterId = e.target.value; await refresh(); });
   renderPage();

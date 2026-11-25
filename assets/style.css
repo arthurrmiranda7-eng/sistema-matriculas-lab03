@@ -101,6 +101,7 @@ svg { vertical-align: middle; }
 .avatar { width: 37px; height: 37px; display: grid; place-content: center; background: #e9eedb; color: var(--green); border-radius: 50%; font-weight: 700; flex-shrink: 0; }
 .profile-name { max-width: 132px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: .875rem; font-weight: 600; }
 .profile-role { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+.account-actions { display: flex; flex-wrap: wrap; gap: 0 12px; }
 .logout { border: 0; background: none; color: var(--muted); padding: 14px 0 0; font-size: .875rem; }
 .logout:hover { color: var(--green); }
 .workspace { min-width: 0; }
@@ -227,7 +228,7 @@ dialog::backdrop { background: #122d2670; backdrop-filter: blur(3px); }
   .nav-label { display: none; }
   .nav-item-button { width: auto; margin: 0; padding: 10px; font-size: .875rem; gap: 7px; }
   .nav-item-button svg { width: 17px; height: 17px; }
-  .sidebar-bottom { display: flex; justify-content: space-between; align-items: center; padding: 15px 0 0; margin-top: 14px; }
+  .sidebar-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding: 15px 0 0; margin-top: 14px; }
   .profile-name { max-width: 220px; }
   .logout { padding: 8px; }
   .topbar { min-height: 64px; padding: 14px 20px; }

@@ -90,6 +90,8 @@ python3 -m http.server 5500
 
 Abra <http://localhost:5500> e entre com sua conta. A secretaria administra os perfis e os vínculos acadêmicos; o aluno precisa estar associado ao curso das disciplinas para se matricular.
 
+Na área autenticada, use **Alterar senha**, informe uma nova senha com pelo menos 12 caracteres e repita-a no campo de confirmação.
+
 ### Usar outro projeto Supabase
 
 Em um projeto novo, execute [schema.sql](supabase/schema.sql) e depois [seed.sql](supabase/seed.sql). Crie as contas em **Authentication → Users** e defina os papéis e cursos em `public.profiles` pelo SQL Editor. Depois, informe a URL e a chave pública em **Configurar conexão** na tela de acesso. Também é possível usar `js/config.local.js`, seguindo `js/config.example.js`.
@@ -124,7 +126,7 @@ Com Node.js 22 ou superior, execute:
 npm test
 ```
 
-Os **15 testes** dos modelos e serviços passaram na validação. Eles cobrem seleção 4+2, duplicidade, prazo, vagas, contratos das chamadas e tratamento de erros.
+Os testes dos modelos e serviços passaram na validação. Eles cobrem seleção 4+2, duplicidade, prazo, vagas, contratos das chamadas e tratamento de erros.
 
 A conexão pública respondeu às verificações de disponibilidade do Supabase Auth, e o acesso sem sessão às tabelas e ao catálogo foi recusado conforme as permissões. Na aplicação publicada, foram conferidos os acessos de aluno, professor e secretaria, a matrícula 4+2, a persistência após recarregar a página, o cancelamento e a reinscrição, a lista de alunos do professor e a geração dos eventos de cobrança.
 

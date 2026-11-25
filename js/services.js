@@ -8,6 +8,7 @@ export class AuthService {
   constructor(client) { this.client = client; }
   async entrar(email, password) { return resultado(this.client.auth.signInWithPassword({ email, password })); }
   async sair() { return resultado(this.client.auth.signOut()); }
+  async alterarSenha(password) { return resultado(this.client.auth.updateUser({ password })); }
   async usuario() {
     const { session } = await resultado(this.client.auth.getSession());
     if (!session) return null;
