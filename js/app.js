@@ -1,4 +1,5 @@
 import { AuthService, CatalogoService, MatriculaService, ProfessorService, SecretariaService } from './services.js';
+import { config as defaultConfig } from './config.js';
 
 const $ = (s, root = document) => root.querySelector(s);
 const app = $('#app');
@@ -281,7 +282,7 @@ async function init() {
         if (response.ok) connection = (await import(url.href)).config;
       } catch { /* A configuração pode ser informada pela interface. */ }
     }
-    if (!connection) return;
+    if (!connection) connection = defaultConfig;
     validateConfig(connection); bindClient(await makeClient(connection));
     state.user = await auth.usuario();
     if (state.user) { state.page = state.user.role === 'aluno' ? 'catalogo' : state.user.role === 'professor' ? 'turmas' : 'curriculo'; await refresh(); }

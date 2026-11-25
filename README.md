@@ -8,7 +8,7 @@ Aplicação para organizar o currículo semestral, realizar e cancelar matrícul
 
 ## Status do projeto
 
-Código do protótipo e modelos UML versionados. O funcionamento conectado exige um projeto Supabase configurado conforme as instruções abaixo. Não há banco simulado, credenciais compartilhadas nem usuários fictícios com senha no repositório. A validação local e seus limites estão descritos em [Testes](#testes).
+Código do protótipo e modelos UML versionados. A conexão pública com o projeto Supabase do autor está incluída em `js/config.js`, e a estrutura do banco já foi instalada nesse projeto. Ao executar a aplicação, não é necessário informar novamente a URL ou a chave pública. As contas são criadas e administradas no Supabase Auth; senhas não são publicadas no repositório. O login remoto ainda precisa ser validado com uma conta cadastrada. A validação local e seus limites estão descritos em [Testes](#testes).
 
 Este README adapta as seções pertinentes do [template indicado pelo professor](https://github.com/joaopauloaramuni/desenvolvimento-de-interfaces-web/blob/main/TEMPLATES/template_README.md). Exemplos de outras tecnologias, arquivos de infraestrutura sem uso e informações não aplicáveis foram retirados.
 
@@ -115,10 +115,13 @@ As versões [v1](docs/modelos/v1) e [v2](docs/modelos/v2) preservam, respectivam
 
 - Navegador moderno com módulos JavaScript habilitados.
 - Python 3 para servir os arquivos localmente, ou outro servidor HTTP estático.
-- Projeto Supabase com acesso administrativo ao SQL Editor e à área Authentication.
+- Conta institucional cadastrada no Supabase Auth para usar o projeto configurado.
+- Para reproduzir o banco em outro projeto: acesso administrativo ao SQL Editor e à área Authentication desse projeto.
 - Node.js 22 ou superior e npm para executar os testes JavaScript, caso desejado.
 
-### 1. Preparar o banco
+### 1. Preparar um banco próprio, se necessário
+
+O projeto do autor já possui a estrutura instalada. Para usar essa conexão, siga diretamente para [Executar](#3-executar) e entre com uma conta cadastrada. Os passos abaixo são para reproduzir o sistema em **um novo projeto Supabase**; não execute novamente `schema.sql` sobre o projeto já configurado.
 
 1. Crie um projeto em [supabase.com](https://supabase.com/).
 2. No **SQL Editor**, execute integralmente [supabase/schema.sql](supabase/schema.sql). O esquema é para um projeto novo; não o aplique sobre um banco de produção existente.
@@ -135,9 +138,11 @@ where id = (select id from auth.users where email = 'secretaria@seu-dominio.edu.
 
 Depois do primeiro login da secretaria, use a área de usuários para ajustar os nomes, papéis e cursos das demais contas. Associe o aluno ao curso cadastrado; atribua às ofertas um perfil com papel `professor`. Sem essas associações, o catálogo ou a lista de turmas poderá ficar vazio.
 
-### 2. Configurar a conexão pública
+### 2. Conexão pública incluída e configuração de outro projeto
 
-No painel Supabase, copie a **Project URL** e a chave pública **anon/publishable**. Há duas formas de configurar:
+O arquivo versionado `js/config.js` fornece a URL e a chave pública **publishable** do projeto Supabase do autor. Essa é a conexão padrão da entrega e dispensa preenchimento manual. O acesso aos dados continua sujeito à sessão do Supabase Auth, às políticas RLS e às permissões do banco.
+
+Para usar **outro projeto**, copie sua **Project URL** e sua chave pública **anon/publishable** no painel Supabase e escolha uma das formas abaixo:
 
 - Na tela de acesso, use **Configurar conexão** e informe os dois valores. A preferência é guardada neste navegador.
 - Ou copie `js/config.example.js` para `js/config.local.js` e substitua os valores de exemplo. Esse arquivo é ignorado pelo Git.
@@ -149,7 +154,9 @@ export const config = {
 };
 ```
 
-Use somente a chave pública. `service_role`, segredos do banco e senhas nunca pertencem ao front-end ou ao repositório. As políticas RLS são necessárias mesmo com a chave pública.
+Uma configuração salva no navegador tem prioridade sobre `config.local.js`; esse arquivo, quando presente, tem prioridade sobre `config.js`.
+
+Chaves públicas anon/publishable são destinadas ao uso no navegador e podem constar na configuração pública. Use somente esse tipo de chave. `service_role`, chaves secretas, segredos do banco e senhas nunca pertencem ao front-end ou ao repositório. As políticas RLS e as permissões do banco protegem os dados mesmo quando a chave pública é conhecida.
 
 ### 3. Executar
 
@@ -161,11 +168,11 @@ python3 -m http.server 5500
 
 Abra <http://localhost:5500>. Não abra `index.html` diretamente com `file://`, pois a aplicação utiliza módulos ES.
 
-Entre com a conta da secretaria para conferir o período do semestre e atribuir o professor às ofertas do currículo inicial. Se o período já venceu, crie um novo semestre e suas ofertas. Entre depois com um aluno vinculado ao mesmo curso para realizar a matrícula.
+Entre com uma conta já criada no Supabase Auth. A secretaria pode conferir o período do semestre, os vínculos acadêmicos e os professores das ofertas. Se o período já venceu, crie um novo semestre e suas ofertas. Para realizar a matrícula, o aluno deve estar vinculado ao mesmo curso das disciplinas. As credenciais de cada conta são fornecidas individualmente pelo responsável pelo projeto, sem publicação no README.
 
 ## Publicação
 
-O projeto pode ser servido por qualquer hospedagem estática, inclusive GitHub Pages, a partir da raiz. Não é necessário publicar `node_modules`, dependências baixadas, capturas temporárias ou ferramentas de modelagem. Ao usar GitHub Pages, configure a conexão pública pela tela do navegador; `config.local.js` não está no repositório. As regras permanecem no Supabase e precisam ser instaladas antes do uso.
+O projeto pode ser servido por qualquer hospedagem estática, inclusive GitHub Pages, a partir da raiz. A conexão pública padrão acompanha `js/config.js`; para outro projeto Supabase, use a configuração da interface ou um arquivo local apropriado. `config.local.js` não está no repositório. Não é necessário publicar `node_modules`, dependências baixadas, capturas temporárias ou ferramentas de modelagem. As regras permanecem no Supabase; um novo projeto precisa receber os scripts antes do uso.
 
 ## Estrutura de pastas
 
@@ -173,7 +180,7 @@ O projeto pode ser servido por qualquer hospedagem estática, inclusive GitHub P
 .
 ├── index.html                 # Interface e acesso
 ├── assets/                    # Estilos e identidade visual
-├── js/                        # Aplicação, modelos, serviços e exemplo de configuração
+├── js/                        # Aplicação, modelos, serviços e configuração pública
 ├── supabase/
 │   ├── schema.sql             # Tabelas, funções, gatilhos, RLS e permissões
 │   ├── seed.sql               # Curso e currículo de exemplo, sem contas/senhas
@@ -191,7 +198,7 @@ O projeto pode ser servido por qualquer hospedagem estática, inclusive GitHub P
 
 ## Demonstração
 
-A interface vazia sem conexão configurada é intencional: dados acadêmicos são lidos do Supabase.
+A aplicação inicia com a conexão pública incluída. Entre com uma conta cadastrada para acessar os dados do Supabase conforme seu perfil. O login e o fluxo conectado devem ser conferidos com as contas reais do projeto.
 
 ## Testes
 
@@ -199,9 +206,13 @@ A interface vazia sem conexão configurada é intencional: dados acadêmicos sã
 
 Em um **projeto Supabase de teste**, depois de instalar `schema.sql`, execute [supabase/tests.sql](supabase/tests.sql) integralmente no SQL Editor como administrador. O script cria fixtures internas sem senha de login, verifica as regras e termina com `ROLLBACK`; uma asserção que falhe aborta a execução.
 
-A regressão cobre papéis e RLS, tentativa de promoção pelo aluno, escrita direta proibida, seleção 4+2, notificação transacional, repetição sem duplicação, cancelamento, privacidade entre alunos, lista do professor, encerramento após o prazo, mínimo de três, teto de 60, recusa da 61ª inscrição sem gravar matrícula parcial confirmação de eventos pela secretaria e proteção dos vínculos acadêmicos e do histórico durante alterações administrativas.
+A regressão cobre papéis e RLS, tentativa de promoção pelo aluno, escrita direta proibida, seleção 4+2, notificação transacional, repetição sem duplicação, cancelamento, privacidade entre alunos, lista do professor, encerramento após o prazo, mínimo de três, teto de 60, recusa da 61ª inscrição sem gravar matrícula parcial, confirmação de eventos pela secretaria e proteção dos vínculos acadêmicos e do histórico durante alterações administrativas.
 
 **Validação executada:** esquema, seed e as **32 asserções da regressão SQL** aprovados em PostgreSQL local via PGlite, com o contexto de autenticação de teste reproduzido e sem fixtures persistidas após o rollback. Isso valida funções, restrições e políticas do banco; não valida login real no Supabase Auth remoto. Os bloqueios que protegem operações concorrentes foram revisados no código SQL, mas não houve teste de requisições simultâneas.
+
+### Verificações remotas de leitura
+
+Com a configuração pública do projeto, os endpoints de saúde e configuração do Supabase Auth responderam **HTTP 200**. Sem sessão autenticada, as consultas às sete tabelas públicas e à função `offering_catalog` foram recusadas com **HTTP 401 / código PostgreSQL 42501**, conforme as permissões previstas. Essas verificações confirmam a disponibilidade dos endpoints e a recusa do acesso anônimo; não comprovam login ou operações de um usuário autenticado.
 
 ### Interface e JavaScript
 
@@ -223,7 +234,7 @@ node --check js/services.js
 
 Foram aprovadas ainda **27 verificações de DOM com serviços simulados**, cobrindo configuração da conexão, navegação dos três perfis, seleção 4+2, busca, formulários, proteção da saída de texto e disponibilidade do encerramento. Essa verificação não valida aparência visual ou integração remota.
 
-A prévia no navegador não pôde ser iniciada nesta execução por uma restrição do ambiente ao abrir a porta do servidor. Sem um projeto Supabase configurado, não se afirma que houve teste completo do fluxo conectado, de login remoto ou de aparência responsiva em um navegador real.
+A prévia no navegador não pôde ser iniciada durante a validação local por uma restrição do ambiente ao abrir a porta do servidor. Após configurar o projeto Supabase, os 15 testes Node e as 27 verificações de DOM com serviços simulados passaram novamente. O login remoto, o fluxo completo com contas reais e a aparência responsiva em um navegador real ainda não foram validados.
 
 ## Documentações utilizadas
 
