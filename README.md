@@ -126,7 +126,7 @@ npm test
 
 Os **15 testes** dos modelos e serviços passaram na validação. Eles cobrem seleção 4+2, duplicidade, prazo, vagas, contratos das chamadas e tratamento de erros.
 
-A conexão pública respondeu às verificações de disponibilidade do Supabase Auth, e o acesso sem sessão às tabelas e ao catálogo foi recusado conforme as permissões. O fluxo completo de login e matrícula com contas reais ainda precisa ser conferido.
+A conexão pública respondeu às verificações de disponibilidade do Supabase Auth, e o acesso sem sessão às tabelas e ao catálogo foi recusado conforme as permissões. Na aplicação publicada, foram conferidos os acessos de aluno, professor e secretaria, a matrícula 4+2, a persistência após recarregar a página, o cancelamento e a reinscrição, a lista de alunos do professor e a geração dos eventos de cobrança.
 
 ## Documentações utilizadas
 

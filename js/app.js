@@ -197,7 +197,7 @@ function renderProfessor() {
   $$('[data-roster]').forEach(el => el.onclick = () => action(async () => {
     const o = offers.find(o => o.id === el.dataset.roster);
     const students = await professor.listarAlunos(o.id);
-    dialog(`Alunos · ${o.code}`, `<p class="text-muted">${esc(o.subject_name)} · ${students.length} alunos matriculados</p>${students.length ? table(['Aluno', 'E-mail', 'Opção'], students.map(s => [esc(s.name), esc(s.email), s.kind === 'obrigatoria' ? 'Obrigatória' : 'Optativa'])) : '<p>Nenhum aluno matriculado nesta turma.</p>'}`);
+    dialog(`Alunos · ${o.code}`, `<p class="text-muted">${esc(o.subject_name)} · ${students.length} ${students.length === 1 ? 'aluno matriculado' : 'alunos matriculados'}</p>${students.length ? table(['Aluno', 'E-mail', 'Opção'], students.map(s => [esc(s.name), esc(s.email), s.kind === 'obrigatoria' ? 'Obrigatória' : 'Optativa'])) : '<p>Nenhum aluno matriculado nesta turma.</p>'}`);
   }));
 }
 function renderCurriculum() {
