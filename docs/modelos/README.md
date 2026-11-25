@@ -23,7 +23,7 @@ As fontes PlantUML e as imagens SVG estão juntas para permitir revisão e ediç
 | Manutenção de cadastros | Vínculos acadêmicos tratados como associações do modelo. | Gatilhos preservam o curso de disciplina com histórico, o papel de professor ainda atribuído e o curso de aluno com matrícula vigente em semestre não encerrado. |
 | Acesso aos dados | Cliente consulta persistência no Supabase. | Diagrama final explicita JWT, RLS, permissões, funções SQL e separação entre interface e validações críticas. |
 
-As revisões foram motivadas pelos requisitos e pela implementação. Não foram disponibilizados comentários de correção feitos em aula, portanto não há alegação de alterações aprovadas ou solicitadas pelo docente.
+As revisões acompanham a implementação e as regras definidas para o projeto.
 
 ## Alinhamento entre classes e persistência
 
